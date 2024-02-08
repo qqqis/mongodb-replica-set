@@ -1,24 +1,38 @@
-version: '3'
-services:
-  mysql:
-    image: mysql:5.6
-    container_name: mysql
-    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --sql-mode=''
-    restart: always
-    ports:
-      - '9001:3306'
-    environment:
-      MYSQL_ROOT_PASSWORD: example
-      MYSQL_DATABASE: dev_db
-      TZ: Asia/Seoul
-    platform: linux/x86_64
+version: "3"
 
-  mongo:
-    image: mongo:4.0.28
-    container_name: mongo
-    command: mongod --smallfiles --logpath=/dev/null
+services:
+  mongodb1:
+    image: mongo:latest
+    container_name: mongo1
+    restart: always
+    command: mongod --replSet rs0 --bind_ip_all
     ports:
-      - '27017:27017'
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=rootuser
-      - MONGO_INITDB_ROOT_PASSWORD=rootpass
+      - 27017:27017
+    volumes:
+      - ./mongo1:/data/db
+
+  mongodb2:
+    image: mongo:latest
+    container_name: mongo2
+    restart: always
+    command: mongod --replSet rs0 --bind_ip_all --port 27018
+    ports:
+      - 27018:27018
+    volumes:
+      - ./mongo2:/data/db
+
+  mongodb3:
+    image: mongo:latest
+    container_name: mongo3
+    restart: always
+    command: mongod --replSet rs0 --bind_ip_all --port 27019
+    ports:
+      - 27019:27019
+    volumes:
+      - ./mongo3:/data/db
+
+
+networks:
+  default:
+    name: mongoCluster
+    # external: true    // docker network 미리 생성한 경우
